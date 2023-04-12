@@ -9,6 +9,7 @@ import pandas_datareader as pdr
 import yfinance as yfin
 yfin.pdr_override()
 import requests
+np.random.seed(42)
 
 #turn off warning signs for cleaner code
 from warnings import filterwarnings

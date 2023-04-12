@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import os
 import json
 import requests
+np.random.seed(42)
 
 def get_econ_data ():
     # define data for DataReader

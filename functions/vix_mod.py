@@ -14,6 +14,7 @@ import requests
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from dateutil.relativedelta import relativedelta
+np.random.seed(42)
 
 #turn off warning signs for cleaner code
 from warnings import filterwarnings
