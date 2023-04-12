@@ -1,19 +1,16 @@
 # General packages
 import pandas as pd
 import numpy as np
-import hvplot.pandas
 import datetime as dt
 
 # needed for API
 import pandas_datareader as pdr
 import yfinance as yfin
 yfin.pdr_override()
-import requests
 
 # Packages related to machine learning
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
-from dateutil.relativedelta import relativedelta
 np.random.seed(42)
 
 #turn off warning signs for cleaner code
@@ -55,4 +52,4 @@ def vix_analysis ():
     vix_df.index = vix_df.index.date
     
     # return results
-    return vix_df, cluster_model
+    return vix_df

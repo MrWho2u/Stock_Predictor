@@ -3,11 +3,6 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 import pandas_datareader as pdr
-import yfinance as yfin
-yfin.pdr_override()
-from dotenv import load_dotenv
-import os
-import json
 import requests
 np.random.seed(42)
 
