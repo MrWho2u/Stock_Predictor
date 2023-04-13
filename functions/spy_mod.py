@@ -1,14 +1,12 @@
 # General packages
 import pandas as pd
 import numpy as np
-import hvplot.pandas
 import datetime as dt
 
 # needed for API
 import pandas_datareader as pdr
 import yfinance as yfin
 yfin.pdr_override()
-import requests
 np.random.seed(42)
 
 #turn off warning signs for cleaner code
@@ -78,8 +76,8 @@ def spy_analysis ():
     spy_df = stochastic_oscillator(spy_df)
     
     def macd(spy_df):
-        spy_df['ma12'] = spy_df['spy_close'].ewm(span=12).mean()
-        spy_df['ma26'] = spy_df['spy_close'].ewm(span=26).mean()
+        spy_df['ma12'] = spy_df['spy_close'].ewm(span=12, ignore_na=True).mean()
+        spy_df['ma26'] = spy_df['spy_close'].ewm(span=26, ignore_na=True).mean()
         spy_df['macd'] = spy_df['ma12'] - spy_df['ma26']
         spy_df['signal_line'] = spy_df['macd'].ewm(span=9).mean()
         return spy_df

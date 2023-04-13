@@ -1,6 +1,5 @@
 # General packages
 import pandas as pd
-
 import hvplot.pandas
 import datetime as dt
 
