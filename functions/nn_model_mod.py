@@ -18,7 +18,7 @@ tf.keras.backend.clear_session()
 np.random.seed(42)
 tf.random.set_seed(42)
 
-def nn_reg_model1 (X_train_scaled, y_train):
+def nn_reg_model (X_train_scaled, y_train):
     # Set Training epoch end limits, save model with the best fit during epoch testing.
     call = [tf.keras.callbacks.EarlyStopping(monitor='loss', 
                                                   mode='min', 
