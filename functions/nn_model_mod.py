@@ -23,7 +23,7 @@ def nn_reg_model (X_train_scaled, y_train):
     call = [tf.keras.callbacks.EarlyStopping(monitor='loss', 
                                                   mode='min', 
                                                   patience=35, 
-                                                  verbose=1,
+                                                  verbose=0,
                                                  ),
                  tf.keras.callbacks.ModelCheckpoint(filepath='best_nn_model.h5', 
                                                     monitor='loss', 
@@ -58,12 +58,12 @@ def nn_reg_model (X_train_scaled, y_train):
         try:
             # Fit the model
             nn_model = nn.fit(X_train_scaled, y_train, validation_split = 0.2, epochs=300, batch_size=64, callbacks = call, verbose=0)
-            b = nn_model.history['loss'][-1]
+            b = nn_model.history['loss'].min()
             i = nn_model.history['val_loss'][-1]
         except:
             # Fit the model
             nn_model = nn.fit(X_train_scaled, y_train, validation_split = 0.2, epochs=300, batch_size=64, callbacks = call, verbose=0)
-            b = nn_model.history['loss'][-1]
+            b = nn_model.history['loss'].min()
             i = nn_model.history['val_loss'][-1]
 
     # load a saved model
