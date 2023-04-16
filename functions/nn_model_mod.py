@@ -57,7 +57,7 @@ def nn_reg_model (X_train_scaled, y_train):
         nn.compile(loss="mean_squared_error", optimizer='adam', metrics=['mean_squared_error'])
         try:
             # Fit the model
-            nn_model = nn.fit(X_train_scaled, y_train, validation_split = 0.2, epochs=300, batch_size=64, callbacks = call, verbose=1)
+            nn_model = nn.fit(X_train_scaled, y_train, validation_split = 0.2, epochs=300, batch_size=64, callbacks = call, verbose=0)
             b = pd.DataFrame(nn_model.history['loss']).min().values
             i = nn_model.history['val_loss'][-1]
         except:
