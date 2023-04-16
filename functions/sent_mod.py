@@ -1,62 +1,64 @@
 # General packages
+import requests
 import pandas as pd
-import hvplot.pandas
-import datetime as dt
-
-# Sentiment Score
-from bs4 import BeautifulSoup
-import matplotlib.pyplot as plt
-from urllib.request import urlopen
-from urllib.request import Request
 import nltk
-nltk.download('vader_lexicon')
+import datetime as dt
+nltk.download('vader_lexicon') 
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from dotenv import load_dotenv
+import os
+
+#turn off warning signs for cleaner code
+from warnings import filterwarnings
+filterwarnings("ignore")
 
 def market_sent ():
-    # define variables for function
-    ticker = 'SPY'
-    web_url = 'https://finviz.com/quote.ashx?t='
-    news_tables = {}
+    today = dt.date.today()
+    current_year = (int(today.strftime("%Y")) + 1)
+    start_year = today - dt.timedelta(days=365*20)
+    start_year = (int(start_year.strftime("%Y")) + 1)
     
-    
-    # set up request
-    url = web_url + ticker
-    req = Request(url=url,headers={"User-Agent": "Chrome"}) 
-    response = urlopen(req)    
-    html = BeautifulSoup(response,"html.parser")
-    news_table = html.find(id='news-table')
-   
-    # Pull articles to new dataframe
-    parsed_news = []
-    for x in news_table.findAll('tr'):
-        a_element = x.find('a', class_='tab-link-news')
-        if a_element is not None:
-            text = a_element.get_text()
-            date_scrape = x.td.text.split()
-            if len(date_scrape) == 1:
-                time = date_scrape[0]
-            else:
-                date = date_scrape[0]
-                time = date_scrape[1]
-            parsed_news.append([date, time, text])
-        
-    # Sentiment Analysis portion
+    # get api key
+    load_dotenv("nyt.env")
+    api_key = os.getenv("NYT")
+    url = "https://api.nytimes.com/svc/archive/v1/{}/{}.json?api-key={}&q=economy"
+
+    # Create an empty dataframe
+    nyt_sentiment = pd.DataFrame(columns=["headline", "date", "compound"])
+
+    # Initialize the VADER sentiment analyzer
     analyzer = SentimentIntensityAnalyzer()
 
-    columns = ['Date', 'Time', 'Headline']
-    news = pd.DataFrame(parsed_news, columns=columns,)
-    scores = news['Headline'].apply(analyzer.polarity_scores).to_list()
+    # Loop through each year and each month from 2003 to today
+    for year in range(start_year, current_year):
+        for month in range(1, 13):
+            # Format the year and month as a string
+            year_month = f"{year}/{month:02d}"
 
-    df_scores = pd.DataFrame(scores)
-    news = news.join(df_scores, rsuffix='_right')
-    news['Date'] = pd.to_datetime(news['Date'])
-    news = news.set_index('Date')
-    
-    # make final table for that show average sentiment for each day 
-    sentiment_df = pd.DataFrame()
-    sentiment_df = news.groupby(news.index).mean()
-    sentiment_df = sentiment_df[['compound']]
+            # Make a request to the NYT API
+            response = requests.get(url.format(year, month, api_key))
+
+            if response.status_code == 200:
+                data = response.json()
+                articles = data["response"]["docs"]
+
+                # Loop through each article and add the headline, date, and sentiment scores to the nyt_sentiment dataframe
+                for article in articles:
+                    # Check if the article is about the economy
+                    testers = ['economy', 's&p', 'stock market', 'us economy']
+                    if any([x in article["snippet"].lower() for x in testers]) or any([x in article["abstract"].lower() for x in testers]) :
+                        # Get the sentiment scores for the headline and add them to the nyt_sentiment dataframe
+                        scores = analyzer.polarity_scores(article["headline"]["main"]+" "+article["abstract"])
+                        nyt_sentiment = nyt_sentiment.append({
+                            "headline": article["headline"]["main"], 
+                            "date": pd.to_datetime(article["pub_date"]).date(), 
+                            "compound": scores["compound"]}, ignore_index=True)
+
+    # Set date as index
+    nyt_sentiment = nyt_sentiment.set_index('date')
+
+    # Make a new dataframe called sentiment_df that groups the average sentiment for each day
+    sentiment_df = nyt_sentiment.groupby(['date']).mean()[['compound']]
     sentiment_df = sentiment_df.rename(columns={'compound': 'Sentiment'})
-    sentiment_df.index = sentiment_df.index.date
     
     return sentiment_df

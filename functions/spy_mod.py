@@ -76,8 +76,8 @@ def spy_analysis ():
     spy_df = stochastic_oscillator(spy_df)
     
     def macd(spy_df):
-        spy_df['ma12'] = spy_df['spy_close'].ewm(span=12, ignore_na=True).mean()
-        spy_df['ma26'] = spy_df['spy_close'].ewm(span=26, ignore_na=True).mean()
+        spy_df['ma12'] = spy_df['spy_close'].ewm(span=12, ignore_na=True, adjust=False).mean()
+        spy_df['ma26'] = spy_df['spy_close'].ewm(span=26, ignore_na=True, adjust=False).mean()
         spy_df['macd'] = spy_df['ma12'] - spy_df['ma26']
         spy_df['signal_line'] = spy_df['macd'].ewm(span=9).mean()
         return spy_df

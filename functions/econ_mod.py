@@ -14,26 +14,43 @@ def get_econ_data ():
     end_str = end.strftime('%Y-%m-%d')
 
     # select tables, enter as dataframe
-    econ_df = pdr.DataReader(['GDPC1','UNRATE','DFF','EFFR','MORTGAGE30US','DTB3','PRIME','MICH','TOTALSA','UMCSENT','HOUST','RECPROUSM156N','REAINTRATREARAT1YE','REAINTRATREARAT10Y'], 'fred', start_str, end_str)
-    names = ['real gdp','unemployment','fed fund effective rate', 'effective fed fund rate', '30 year mortgage', '3t-bill market rate', 'prime bank loan rate', 'michigan inflaction pred', 'total car sales','cons sentiment','new housing','recession prob']
+    list_of_pct_tables = ['SOFR30DAYAVG', 'SOFR', 'EFFR', 'AAA', 'DBAA', 'T10YIE', 'T5YIE', 'MORTGAGE30US', 'DGS30', 'DGS1','BAMLH0A0HYM2EY']
+    # AAA - BBB is spread
+    lisf_of_val_tables = ['SOFRVOL', 'RECPROUSM156N', 'SAHMREALTIME']
+    econ_df_pct = pdr.DataReader(list_of_pct_tables, 'fred', start_str, end_str)
+    econ_df_val = pdr.DataReader(lisf_of_val_tables, 'fred', start_str, end_str)
     
     #filling blank values with prior value
-    econ_df.fillna(method='ffill', inplace=True)
-    # calculate pct change
-    econ_df2 = econ_df.pct_change()
-    econ_df2['RECPROUSM156N']=econ_df['RECPROUSM156N']
-    econ_df = econ_df2
-    # seporate out daily metrics
-    daily_df = econ_df[['DFF', 'EFFR', 'DTB3']]
-    econ_df = econ_df.drop(columns=['DFF', 'EFFR', 'DTB3'])
-    # replace 0 values with null
-    econ_df.replace(0, np.nan, inplace=True)
-    # refill nulls with prior value
-    econ_df.fillna(method='ffill', inplace=True)
-        # add back in daily values
-    econ_df = pd.concat([daily_df, econ_df], axis=1)
+    econ_df_pct.fillna(method='ffill', inplace=True)
+    econ_df_val.fillna(method='ffill', inplace=True)
+    
+    #create spread metrics
+    spread_df = pd.DataFrame()
+    spread_df['ab_bond_spread'] = econ_df_pct["DBAA"] - econ_df_pct["AAA"]
+    spread_df['junk_bond_spread'] = econ_df_pct["BAMLH0A0HYM2EY"] - econ_df_pct["AAA"]
+    spread_df['int_spread'] = econ_df_pct["DGS30"] - econ_df_pct["DGS1"]
+    
+    # calculate daily changes
+    temp_df = econ_df_val[['RECPROUSM156N','SAHMREALTIME']]
+    econ_df_pct = econ_df_pct.diff()
+    econ_df_val = econ_df_val.pct_change()
+    
+    # add back in unchange probability
+    econ_df_val[['RECPROUSM156N','SAHMREALTIME']] = temp_df
+    
+    # combine data
+    econ_df = pd.concat([econ_df_pct, econ_df_val, spread_df], axis=1)
+    
     # remove inf values
     econ_df[np.isinf(econ_df)] = 0
+    # fill blanks
+    temp_df = econ_df[['RECPROUSM156N','SAHMREALTIME']]
+    temp_df.fillna(method='ffill', inplace=True)
+    econ_df[['RECPROUSM156N','SAHMREALTIME']] = temp_df
+    
+    #drop blank columns
+    econ_df = econ_df.dropna(subset='EFFR')
+    
     # update index to date
     econ_df.index = econ_df.index.date
 

@@ -6,7 +6,7 @@ np.random.seed(42)
 
 from .vix_mod import vix_analysis
 from .spy_mod import spy_analysis
-from .econ2_mod import get_econ_data
+from .econ_mod import get_econ_data
 from .sent_mod import market_sent
 
 def create_train_test_tables ():
