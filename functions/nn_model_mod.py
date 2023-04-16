@@ -18,7 +18,7 @@ tf.keras.backend.clear_session()
 np.random.seed(42)
 tf.random.set_seed(42)
 
-def nn_reg_model (X_train_scaled, y_train):
+def nn_reg_model1 (X_train_scaled, y_train):
     # Set Training epoch end limits, save model with the best fit during epoch testing.
     call = [tf.keras.callbacks.EarlyStopping(monitor='loss', 
                                                   mode='min', 
@@ -35,7 +35,7 @@ def nn_reg_model (X_train_scaled, y_train):
     # create a loop to ensure that the fit of the machine learning model meets certain requirements
     i=10
     b=10
-    while (i >= 1.39) or (b >= .09):
+    while (i >= 1.39) or (b >= .08):
         # fix random seed for same reproducibility as my results due to stochastic nature of start point
         K.clear_session()
         tf.keras.backend.clear_session()
@@ -57,13 +57,13 @@ def nn_reg_model (X_train_scaled, y_train):
         nn.compile(loss="mean_squared_error", optimizer='adam', metrics=['mean_squared_error'])
         try:
             # Fit the model
-            nn_model = nn.fit(X_train_scaled, y_train, validation_split = 0.2, epochs=300, batch_size=64, callbacks = call, verbose=0)
-            b = nn_model.history['loss'].min()
+            nn_model = nn.fit(X_train_scaled, y_train, validation_split = 0.2, epochs=300, batch_size=64, callbacks = call, verbose=1)
+            b = pd.DataFrame(nn_model.history['loss']).min().values
             i = nn_model.history['val_loss'][-1]
         except:
             # Fit the model
             nn_model = nn.fit(X_train_scaled, y_train, validation_split = 0.2, epochs=300, batch_size=64, callbacks = call, verbose=0)
-            b = nn_model.history['loss'].min()
+            b = pd.DataFrame(nn_model.history['loss']).min().values
             i = nn_model.history['val_loss'][-1]
 
     # load a saved model
