@@ -23,7 +23,7 @@ def nn_reg_model (X_train_scaled, y_train):
     call = [tf.keras.callbacks.EarlyStopping(monitor='loss', 
                                                   mode='min', 
                                                   patience=35, 
-                                                  verbose=0,
+                                                  verbose=1,
                                                  ),
                  tf.keras.callbacks.ModelCheckpoint(filepath='best_nn_model.h5', 
                                                     monitor='loss', 
@@ -35,7 +35,7 @@ def nn_reg_model (X_train_scaled, y_train):
     # create a loop to ensure that the fit of the machine learning model meets certain requirements
     i=10
     b=10
-    while (i >= 1.39) or (b >= .08):
+    while (i >= 1.39) or (b >= .05):
         # fix random seed for same reproducibility as my results due to stochastic nature of start point
         K.clear_session()
         tf.keras.backend.clear_session()
@@ -50,7 +50,7 @@ def nn_reg_model (X_train_scaled, y_train):
         # add first hidden layer
         nn.add(Dense(units=150, activation="relu"))
         # add third hidden layer
-        nn.add(Dense(units=5, activation="relu"))
+        nn.add(Dense(units=10, activation="relu"))
         # Output layer
         nn.add(Dense(units=1, activation="linear"))
         # Compile the model
